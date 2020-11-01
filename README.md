@@ -7,8 +7,10 @@ A collection of behavioural experiments programmed with Matlab.
 * Reaction Times task
 * Visual Search task
 * Simon task
+* Change blindness task
 * Discriminability task
 * Attentional Blink task
 * N-back task
 * Working Memory task
-* Long-term Memory task
+* Episodic Memory task
+* Semantic memory task
