@@ -1,5 +1,5 @@
 # ORAMMA
-**O**bject **R**ecognition, **A**ttention, **M**emory with **MA**tlab. 
+**O**bject **R**ecognition, **A**ttention, **M**emory with **MA**tlab (**ORAMMA** experiments). 
 
 A collection of behavioural experiments programmed with Matlab.
 
