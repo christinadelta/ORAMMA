@@ -1,4 +1,4 @@
-% ORAMMA EXPERIMENTS: REACTION TIMES TASK Simple version (version 1)
+% ORAMMA EXPERIMENTS: ATTENTIONAL BLINK TASK Simple version (version 1)
 
 % For helpful info regarding the psychtoolbox see:
 % http://peterscarfe.com/ptbtutorials.html
@@ -6,12 +6,14 @@
 
 % ChristinaDelta (christina.delta.k@gmail.com)
 
-% This script runs the reaction times task
+% This script runs the simple version of attentional blink task
 % The script is called from the startup file in the root directory
 
 % DEPENDENCIES:
 % MATLAB VERSION 2020a
 % Psychophysics toolbox 3
+
+% ----------------------------------------------
 
 %% ------ experiment setup ----------- %%
 
@@ -35,18 +37,16 @@ rand('state', sum(100*clock));
 % experimental settings
 basedir         = pwd;
 PNb             = str2num(answer{2}); % participant number
-taskNb          = 1; % task number
+taskNb          = 2; % task number
 
 % get directories and add utility functions to the path
 workingdir      = fullfile(basedir, 'oramma_experiments');
 addpath(genpath(fullfile(workingdir,'utilities')));                         % add subfunctions to the path
 
-
 % % setup study output file
 % resultsfolder       = fullfile(set.workingdir, 'results');
 % outputfile          = fopen([resultsfolder '/resultfile_' num2str(set.PNb) '.txt'],'a');
 % fprintf(outputfile, 'subID\t imageSet\t trial\t textItem\t imageOrder\t response\t RT\n');
-
 
 %% --------------- RUN A FEW IMPORTANT UTIL FUNCTIONS ----------------- %%
 
@@ -104,21 +104,23 @@ try
     
     % Start instructions
     DrawFormattedText(window,'Pay attentions to the instructions','center','center',scrn.white);
-    runstart = Screen('Flip', window);
-    requested_runstart = runstart + 2;
+    expstart = Screen('Flip', window);
+    exp_duration = expstart + 2;
     
     % display instructions 
     instructions = Screen('OpenOffscreenWindow', window, windrect);
     Screen('TextSize', instructions, scrn.textsize);
     Screen('FillRect', instructions, scrn.grey ,windrect);
     DrawFormattedText(instructions, 'Please maintain your attention at the center of the screen. In every trial,', 'center', scrn.ycenter-100, scrn.white);
-    DrawFormattedText(instructions, 'you will be presented with an image (stimulus) at the center of the screen. When the stimulus is gone,', 'center', scrn.ycenter-50, scrn.white);
-    DrawFormattedText(instructions, 'press Q if the stimulus was animate, press P if it was inanimate. ', 'center', 'center', scrn.white);
-    DrawFormattedText(instructions, 'Press space to continue.','center', scrn.ycenter+50, scrn.white);
-    
+    DrawFormattedText(instructions, 'you will be presented with letters and with 2 digits. You will need to hold the digits in,', 'center', scrn.ycenter-50, scrn.white);
+    DrawFormattedText(instructions, 'your memory. By the end of every trial you will be asked to choose between 3 options, the first digit.', 'center', 'center', scrn.white);
+    DrawFormattedText(instructions, 'Press 1 if the digit was the upper left option, press 2 if it was the upper right option, or press 3 if .','center', scrn.ycenter+50, scrn.white);
+    DrawFormattedText(instructions, 'it was the centered option. After you report the first digit, you will be asked to report the second one ','center', scrn.ycenter+100, scrn.white);
+    DrawFormattedText(instructions, 'in the same manner. Press SPACE if you have understood the instructions.','center', scrn.ycenter+150, scrn.white); 
+     
     % copy the instructions window  and flip.
     Screen('CopyWindow',instructions,window,windrect, windrect);
-    runstart = Screen('Flip', window, requested_runstart);
+    Screen('Flip', window, exp_duration);
     
     % WAIT FOR THEM TO PRESS SPACE
     waitforresp = 1;
@@ -145,7 +147,7 @@ try
             Screen('TextSize', window, scrn.textsize);
             Screen('FillRect', window, scrn.grey ,windrect);
             DrawFormattedText(window, sprintf('Great! Starting run %d',run), 'center', 'center', scrn.white);
-            runstart = Screen('Flip', window); 
+            Screen('Flip', window); 
             WaitSecs(3); % wait for three secs before starting the 1st run
             
             set.run = run;
@@ -158,7 +160,7 @@ try
             Screen('FillRect', window, scrn.grey ,windrect);
             DrawFormattedText(window, 'Time for a break! When ready to continue, press SPACE', 'center', scrn.ycenter-50, scrn.white);
             DrawFormattedText(window, 'If you want to quit, press ESC.', 'center', 'center', scrn.white);
-            runstart = Screen('Flip', window); 
+            Screen('Flip', window); 
             
             waitforresp = 1;
             while waitforresp
@@ -179,7 +181,7 @@ try
                     Screen('TextSize', window, scrn.textsize);
                     Screen('FillRect', window, scrn.grey ,windrect);
                     DrawFormattedText(window, sprintf('Great! Starting run %d',run), 'center', 'center', scrn.white);
-                    runstart = Screen('Flip', window); 
+                    Screen('Flip', window); 
                     WaitSecs(3)
                     
                     waitforresp = 0;
@@ -200,7 +202,7 @@ try
     Screen('OpenOffscreenWindow', window, windrect);
     Screen('TextSize', window, scrn.textsize);
     Screen('FillRect', window, scrn.grey ,windrect);
-    vbl = DrawFormattedText(window, 'This is the end of the experiment. Thank you for your time', 'center', 'center', scrn.white);
+    DrawFormattedText(window, 'This is the end of the experiment. Thank you for your time', 'center', 'center', scrn.white);
     Screen('Flip',window);
     WaitSecs(3);
     
