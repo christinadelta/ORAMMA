@@ -11,7 +11,7 @@ ptbdir          = '/Applications/Psychtoolbox'; % change to your ptb directory
 addpath(genpath(ptbdir))
 
 scrn.ptbdir     = ptbdir;
-scrn.screenRes  = [1440 900]; % change to your screen's resolution
+scrn.screenRes  = [1152 720]; % change to your screen's resolution
 
 %% define screen parameters 
 

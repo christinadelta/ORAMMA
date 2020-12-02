@@ -43,11 +43,11 @@ elseif taskNb == 2
     
     RestrictKeysForKbCheck(KbChecklist);
     
-    keys.option1    = KbChecklist(1); % '1'- upper left
-    keys.option2    = KbChecklist(2); % '2'- upper right
-    keys.option3    = KbChecklist(1); % '3'- center
-    keys.spacekey   = KbChecklist(3); % 'space'
-    keys.esckey     = KbChecklist(4); % 'escape'
+    keys.option1    = KbChecklist(1); % '1'- lower left
+    keys.option2    = KbChecklist(2); % '2'- middle
+    keys.option3    = KbChecklist(3); % '3'- lower right
+    keys.spacekey   = KbChecklist(4); % 'space'
+    keys.esckey     = KbChecklist(5); % 'escape'
 
     
 end % end of if statement

@@ -15,38 +15,40 @@
 
 % ----------------------------------------------
 
-%% ------ experiment setup ----------- %%
-
-% Clear the workspace and screen
-sca;
-close all;
-clearvars;
-clc;
-
-% create a user input dialog to gather information
-prompt      = {'Enter task name (e.g. rts):','Enter subject number (e.g. 01:'};
-dlgtitle    = 'Info window';
-dims        = [1 30];
-definput    = {'rts','01'}; % this is a default input (this should change)
-answer      = inputdlg(prompt,dlgtitle,dims,definput);
-init        = answer;
+%% ------ initial experimental setup ----------- %%
 
 % Initialize the random number generator
 rand('state', sum(100*clock)); 
 
-% experimental settings
-basedir         = pwd;
+
+% get participant nb and task name 
+answer          = startup.answer;
+
+% initial experimental settings
 PNb             = str2num(answer{2}); % participant number
+taskName        = answer{1}; 
 taskNb          = 2; % task number
+basedir         = pwd;
 
 % get directories and add utility functions to the path
 workingdir      = fullfile(basedir, 'oramma_experiments');
 addpath(genpath(fullfile(workingdir,'utilities')));                         % add subfunctions to the path
 
+
+% define a few parameters that wil go to the log files
+logs.PNb            = PNb;
+logs.task           = taskName;
+logs.date           = datestr(now, 'ddmmyy');
+logs.time           = datestr(now, 'hhmm');
+
+logs.output         = 'subject_%02d_task_%s_run_%02d_logs.mat';
+
 % % setup study output file
-% resultsfolder       = fullfile(set.workingdir, 'results');
-% outputfile          = fopen([resultsfolder '/resultfile_' num2str(set.PNb) '.txt'],'a');
-% fprintf(outputfile, 'subID\t imageSet\t trial\t textItem\t imageOrder\t response\t RT\n');
+logs.resultsfolder  = fullfile(workingdir, 'results',taskName, sprintf('sub-%02d', PNb));
+
+if ~exist(logs.resultsfolder, 'dir')
+    mkdir(logs.resultsfolder)
+end
 
 %% --------------- RUN A FEW IMPORTANT UTIL FUNCTIONS ----------------- %%
 
@@ -85,11 +87,13 @@ try
     % pc actual screen settings
     scrn.actscreen          = Screen('Resolution', screenNumber);
     [actwidth, actheight]   = Screen('DisplaySize', screenNumber);
+    scrn.acthz              = Screen('FrameRate', window, screenNumber);
     
     scrn.ifi                = Screen('GetFlipInterval', window);            % frame duration
     
     scrn.slack              = Screen('GetFlipInterval', window)/2;          % Returns an estimate of the monitor flip interval for the specified onscreen window
     
+    scrn.frame_rate         = 1/scrn.ifi;
     scrn.actwidth           = actwidth;
     scrn.actheight          = actheight;
     scrn.window             = window;
@@ -100,7 +104,7 @@ try
     scrn.ypixels            = ypixels;
     
     
-    %% ------------- INSTRUCTIONS ------------------ %%
+    %% ------------- CREAT AND RUN INSTRUCTIONS ------------------ %%
     
     % Start instructions
     DrawFormattedText(window,'Pay attentions to the instructions','center','center',scrn.white);
@@ -111,11 +115,11 @@ try
     instructions = Screen('OpenOffscreenWindow', window, windrect);
     Screen('TextSize', instructions, scrn.textsize);
     Screen('FillRect', instructions, scrn.grey ,windrect);
-    DrawFormattedText(instructions, 'Please maintain your attention at the center of the screen. In every trial,', 'center', scrn.ycenter-100, scrn.white);
-    DrawFormattedText(instructions, 'you will be presented with letters and with 2 digits. You will need to hold the digits in,', 'center', scrn.ycenter-50, scrn.white);
-    DrawFormattedText(instructions, 'your memory. By the end of every trial you will be asked to choose between 3 options, the first digit.', 'center', 'center', scrn.white);
+    DrawFormattedText(instructions, 'Please maintain your attention at the center of the screen. In every trial', 'center', scrn.ycenter-100, scrn.white);
+    DrawFormattedText(instructions, 'you will be rapidly presented with letters and with 2 digits. You will need to pay attention to', 'center', scrn.ycenter-50, scrn.white);
+    DrawFormattedText(instructions, 'the digits. By the end of every trial you will be asked to choose between 3 options the first digit.', 'center', 'center', scrn.white);
     DrawFormattedText(instructions, 'Press 1 if the digit was the upper left option, press 2 if it was the upper right option, or press 3 if .','center', scrn.ycenter+50, scrn.white);
-    DrawFormattedText(instructions, 'it was the centered option. After you report the first digit, you will be asked to report the second one ','center', scrn.ycenter+100, scrn.white);
+    DrawFormattedText(instructions, 'it was the centered option. After you report the first digit, you will be asked to report the second one','center', scrn.ycenter+100, scrn.white);
     DrawFormattedText(instructions, 'in the same manner. Press SPACE if you have understood the instructions.','center', scrn.ycenter+150, scrn.white); 
      
     % copy the instructions window  and flip.
@@ -150,8 +154,7 @@ try
             Screen('Flip', window); 
             WaitSecs(3); % wait for three secs before starting the 1st run
             
-            set.run = run;
-            set     = RunTrials(set, trials, scrn, keys); 
+            [set,logs]     = RunTrials(set, trials, scrn, keys, run, logs); 
             
         elseif run > 1
             
@@ -187,8 +190,7 @@ try
                     waitforresp = 0;
                     
                     % start next run
-                    set.run = run;
-                    set     = RunTrials(set, trials, scrn, keys); 
+                    [set,logs]     = RunTrials(set, trials, scrn, keys, run, logs); 
                 end % 
                 
             end % end of waiting while loop

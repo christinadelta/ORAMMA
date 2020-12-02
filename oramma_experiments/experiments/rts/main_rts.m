@@ -85,11 +85,13 @@ try
     % pc actual screen settings
     scrn.actscreen          = Screen('Resolution', screenNumber);
     [actwidth, actheight]   = Screen('DisplaySize', screenNumber);
+    scrn.acthz              = Screen('FrameRate', window, screenNumber);
     
     scrn.ifi                = Screen('GetFlipInterval', window);            % frame duration
     
     scrn.slack              = Screen('GetFlipInterval', window)/2;          % Returns an estimate of the monitor flip interval for the specified onscreen window
     
+    scrn.frame_rate         = 1/scrn.ifi;
     scrn.actwidth           = actwidth;
     scrn.actheight          = actheight;
     scrn.window             = window;

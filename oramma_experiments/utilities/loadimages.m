@@ -108,7 +108,7 @@ elseif taskNb == 2 % ab version 1
     % -----------------------
     % create a stucture to store the target image files 
     targetdata                  = [];
-    set.alldtargets             = length(digits);  
+    set.alltargets              = length(digits);  
     
     for i=1:length(digits)
 
