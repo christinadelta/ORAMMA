@@ -1,12 +1,14 @@
-function [set] = RunTrials(set, trials, scrn, keys, run, logs)
+function [set, logs, keys] = RunTrials(set, trials, scrn, keys, run, logs)
 
 % the script gets various stored information from other subfunctions to run
 % one block (run). All the tasks will run in this function. To run the
 % correct trial list we need the "task number"
 
 % TODO:
-% 1. ADD ABORT OPTION IN RTS TASK
+% 1. ADD ABORT OPTION IN RTS & AB TASK
 % 2. SAVE TRIAL INFO IN RTS TASK
+% 3. RESPONSES, ANSWERS ETC IN AB TASK ARE NOT RECORDED (CHECK & FIX ASAP)
+% 4. ADD QUESTION ABOUT 1ST AND 2D TARGET IN RESPONSE WINDOWS
 
 %% ---- Prepare the "global" information needed for all the tasks ---- %%
 
@@ -200,11 +202,6 @@ elseif taskNb == 2 % if it is ab
     middleRect  = [xcenter-imagewidth/2 ycenter-r xcenter+imagewidth ycenter-r+imageheight];                       % the 4 points on the screen of the middle item
     allrects    = [leftRect; middleRect; rightRect]';
     
-%     allrects = [xcenter-x-imagewidth/2 ycenter+y-imageheight/2 xcenter-x+imagewidth/2 ycenter+y+imageheight/2;...
-%         xcenter-imagewidth/2 ycenter-r xcenter+imagewidth ycenter-r+imageheight;...
-%         xcenter+x-imagewidth/2 ycenter+y-imageheight/2 xcenter+x+imagewidth/2 ycenter+y+imageheight/2];
-%     allrects = allrects';
-    
     % CREATE RESPONSE WINDOWS AND PASTE LATER
     t1_responsewindow = Screen('OpenOffscreenWindow',window);
     Screen('FillRect',t1_responsewindow, grey);
@@ -375,49 +372,44 @@ elseif taskNb == 2 % if it is ab
         
         resp_input = 0;
         % collect response 
-        while resp_input == 0 && (GetSecs - fliptime) < responsetime 
-            [keyisdown, secs, keycode] = KbCheck;
-            pressedKeys = find(keycode);
+        while resp_input == 0 && (GetSecs - fliptime) < responsetime - ifi
+            [~, secs, keycode] = KbCheck;
+            if keycode(1,keys.option1) % subject pressed key 1
+                resp_input  = keys.option1;
+                rt          = secs - fliptime;
+                answer      = t1options(1); % left option
+                respmade    = secs;
+
+            elseif keycode(1,keys.option2) % subject pressed key 2
+                resp_input  = keys.option2;
+                rt          = secs - fliptime;
+                answer      = t1options(2); % middle option
+                respmade    = secs;
+
+            elseif keycode(1,keys.option3) % subject pressed key 3
+                resp_input  = keys.option3;
+                rt          = secs - fliptime;
+                answer      = t1options(3); % right option
+                respmade    = secs;
+
+            elseif keycode(1,keys.esckey)
+                resp_input  = keys.esckey;
+                rt          = nan;
+                answer      = nan;
+                respmade    = nan;
+                abort       = 1;
+                break
+                
+            else
+                resp_input  = 0; 
+                rt          = nan;
+                answer      = nan;
+                respmade    = GetSecs;
+                
+            end % end of key press if statement
             
-            % check the response key
-            if isempty(pressedKeys) % if subject didn't press any key
-                resp_input      = 0; 
-                rt              = nan;
-                answer          = nan;
-                respmade        = GetSecs;
-                
-            elseif ~isempty(pressedKeys) % if subjects pressed a valid key
-                
-                if keycode(1,option1) % subject pressed key 1
-                    resp_input  = option1;
-                    rt          = secs - fliptime;
-                    answer      = t1options(1); % left option
-                    respmade    = secs;
-                    
-                elseif keycode(1,option2) % subject pressed key 2
-                    resp_input  = option2;
-                    rt          = secs - fliptime;
-                    answer      = t1options(2); % middle option
-                    respmade    = secs;
-                    
-                elseif keycode(1,option3) % subject pressed key 3
-                    resp_input  = option3;
-                    rt          = secs - fliptime;
-                    answer      = t1options(3); % right option
-                    respmade    = secs;
-                    
-                elseif keycode(1,esckey)
-                    resp_input  = esckey;
-                    rt          = nan;
-                    answer      = nan;
-                    respmade    = nan;
-                    abort       = 1;
-                    break
-                end % end of key press if statement
-           
-            end % end of response if statement
-        
         end % end of response while loop
+        
         
         t1rt        = rt;
         t1answer    = answer;
@@ -425,7 +417,7 @@ elseif taskNb == 2 % if it is ab
         
         clear resp_input rt answer 
         
-        objectoff = respmade + responsetime - ifi; % give one second to respond
+        objectoff = respmade + (isi*2) - ifi; % give one second to respond
         
         % add the short delay between the end of the t1 response window
         % and t2 response window
@@ -450,51 +442,43 @@ elseif taskNb == 2 % if it is ab
         Screen('CopyWindow',window, window, windrect, windrect);
         fliptime = Screen('Flip',window, objectoff); % 
         
-        
         resp_input = 0;
-        % collect response 
-        while resp_input == 0 && (GetSecs - fliptime) < responsetime 
-            [keyisdown, secs, keycode] = KbCheck;
-            pressedKeys = find(keycode);
+        while resp_input == 0 && (GetSecs - fliptime) < responsetime - ifi
+            [~, secs, keycode] = KbCheck;
+            if keycode(1,keys.option1) % subject pressed key 1
+                resp_input  = keys.option1;
+                rt          = secs - fliptime;
+                answer      = t1options(1); % left option
+                respmade    = secs;
+
+            elseif keycode(1,keys.option2) % subject pressed key 2
+                resp_input  = keys.option2;
+                rt          = secs - fliptime;
+                answer      = t1options(2); % middle option
+                respmade    = secs;
+
+            elseif keycode(1,keys.option3) % subject pressed key 3
+                resp_input  = keys.option3;
+                rt          = secs - fliptime;
+                answer      = t1options(3); % right option
+                respmade    = secs;
+
+            elseif keycode(1,keys.esckey)
+                resp_input  = keys.esckey;
+                rt          = nan;
+                answer      = nan;
+                respmade    = nan;
+                abort       = 1;
+                break
+                
+            else
+                resp_input  = 0; 
+                rt          = nan;
+                answer      = nan;
+                respmade    = GetSecs;
+                
+            end % end of key press if statement
             
-            % check the response key
-            if isempty(pressedKeys) % if subject didn't press any key
-                resp_input      = 0; 
-                rt              = nan;
-                answer          = nan;
-                respmade        = GetSecs;
-                
-            elseif ~isempty(pressedKeys) % if subjects pressed a valid key
-                
-                if keycode(1,option1) % subject pressed key 1
-                    resp_input  = option1;
-                    rt          = secs - fliptime;
-                    answer      = t2options(1); % left option
-                    respmade    = secs;
-                    
-                elseif keycode(1,option2) % subject pressed key 2
-                    resp_input  = option2;
-                    rt          = secs - fliptime;
-                    answer      = t2options(2); % middle option
-                    respmade    = secs;
-                    
-                elseif keycode(1,option3) % subject pressed key 3
-                    resp_input  = option3;
-                    rt          = secs - fliptime;
-                    answer      = t2options(3); % left option
-                    respmade    = secs;
-                    
-                elseif keycode(1,esckey)
-                    resp_input  = esckey;
-                    rt          = nan;
-                    answer      = nan;
-                    respmade    = nan;
-                    abort       = 1;
-                    break
-                end % end of key press if statement
-           
-            end % end of response if statement
-        
         end % end of response while loop
         
         t2rt        = rt;
@@ -503,7 +487,7 @@ elseif taskNb == 2 % if it is ab
         
         clear resp_input rt answer % clear workspace a bit
         
-        objectoff   = respmade + responsetime - ifi; % give one second to respond
+        objectoff   = respmade + (isi*2) - ifi; % give one second to respond
         
         % display fixation cross and wait for next trial
         Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
@@ -512,7 +496,7 @@ elseif taskNb == 2 % if it is ab
         
         % save trial info in a mat file
         runtrials(itrial).trialNb   = itrial;
-        runtrial(itrial).trialstart = trialstart;
+        runtrials(itrial).trialstart = trialstart;
         runtrials(itrial).t1start   = t1Start;
         runtrials(itrial).t2start   = t2Start;
         runtrials(itrial).RSVP      = thisRSVP;
@@ -529,7 +513,6 @@ elseif taskNb == 2 % if it is ab
         runtrials(itrial).t1correct = t1correct;
         runtrials(itrial).t2correct = t2correct;
         runtrials(itrial).run       = run;
-        
         
     end % end of trials loop
  

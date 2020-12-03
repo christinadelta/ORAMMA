@@ -35,7 +35,7 @@ elseif taskNb == 2 % if task is ab
     
     lags            = 2; % lag2 and lag7
     
-    targetreps      = 12; % each digit will be presented the same nb of times as t1, t2, lag2 and lag7
+    targetreps      = 10; % each digit will be presented the same nb of times as t1, t2, lag2 and lag7
    
     targetoptions   = set.Ditems; % digit items (targets) for both lags 
     

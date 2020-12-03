@@ -46,7 +46,7 @@ elseif taskNb == 2
     
     % BASIC IMPORTANT SETTINGS
     set.name        = 'ab'; % task name
-    set.runs        = 6; % number of blocks (or runs)
+    set.runs        = 8; % number of blocks (or runs)
     set.break       = 5; % default break between runs
     set.EEG         = 0; % set to 1 when in testing room
     set.MEG         = 0; % set to 1 when in testing room
