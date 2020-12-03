@@ -13,11 +13,8 @@ function[keys] = DefineKeys(taskNb)
 % 2. Space key (allows subject to move to next runs
 
 KbName('UnifyKeyNames');
-keys.spacekey   = KbName('space');
-keys.esckey     = KbName('ESCAPE');
-keys.option1    = KbName('1!'); % '1'- lower left
-keys.option2    = KbName('2@'); % '2'- middle
-keys.option3    = KbName('3#'); % '3'- lower right
+KbChecklist     = [KbName('space'),KbName('ESCAPE')];
+
 
 % CREATE A LIST WITH TASK SPECIFIC KEYS
 if taskNb == 1 % if task is rts
@@ -38,18 +35,20 @@ if taskNb == 1 % if task is rts
     
 elseif taskNb == 2
     
-%     responsekeys    = {'1','2','3'}; % 1 = upper left option, 2 = upper right option,  3 = center option
-%     
-%     for i = 1:length(responsekeys)
-%         
-%         KbChecklist = [KbName(responsekeys{i}),KbChecklist];
-%     end
-%     
-%     RestrictKeysForKbCheck(KbChecklist);
+    responsekeys    = {'1!','2@','3#'}; % 1 = upper left option, 2 = upper right option,  3 = center option
     
-    keys.option1    = KbName('1!'); % '1'- lower left
-    keys.option2    = KbName('2@'); % '2'- middle
-    keys.option3    = KbName('3#'); % '3'- lower right
+    for i = 1:length(responsekeys)
+        
+        KbChecklist = [KbName(responsekeys{i}),KbChecklist];
+    end
+    
+    RestrictKeysForKbCheck(KbChecklist);
+    
+    keys.option1    = KbChecklist(1); % '1'- lower left
+    keys.option2    = KbChecklist(2); % '2'- middle
+    keys.option3    = KbChecklist(3); % '3'- lower right
+    keys.spacekey   = KbChecklist(4); % '4'- space
+    keys.esckey     = KbChecklist(5); % '5'- escape
     
     
 end % end of if statement

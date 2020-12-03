@@ -1,4 +1,4 @@
-function [set, logs, keys] = RunTrials(set, trials, scrn, keys, run, logs)
+function [set, logs] = RunTrials(set, trials, scrn, run, logs)
 
 % the script gets various stored information from other subfunctions to run
 % one block (run). All the tasks will run in this function. To run the
@@ -45,9 +45,8 @@ triallist       = trials.list;      % trials matrix of the entire experiment
 
 currentlist     = triallist{run};   % trials matrix of the current run
 
-% global keys
-esckey          = keys.esckey;      % esc key is used in all tasks
 
+keys            = DefineKeys(taskNb); % run the keys function
 
 % Compute destination rectangle location
 destrect        = [xcenter-imagewidth/2, ycenter-imageheight/2, xcenter+imagewidth/2, ycenter+imageheight/2];
@@ -77,6 +76,8 @@ if taskNb == 1 % if the task is RTS
         texture{i} = Screen('MakeTexture', window, data(i).file); 
 
     end
+    
+    set.texture = texture;
 
     
     % store the different image information of the current run in separate arrays
@@ -84,67 +85,69 @@ if taskNb == 1 % if the task is RTS
     animacy         = currentlist(:,2);
     category        = currentlist(:,3);
     
-    % get the 'rts' related keys 
-    animatekey      = keys.animatekey;
-    inanimatekey    = keys.inanimatekey;
+    %% start the current run
+    
+    % create a structure to store the trial info     
+    runtrials   = [];
     
     % start the run with the fixation cross
     Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
-    runstart = Screen('Flip', window); % flip fixation window
+    fliptime    = Screen('Flip', window); % flip fixation window
+    runstart    = fliptime;
     
-    objecton = runstart + isi + randperm(jitter*1000,1)/1000 - ifi;
+    objectoff = runstart + isi + randperm(jitter*1000,1)/1000 - ifi;
     
     % loop through the current trial list
     for itrial = 1:nbtrials
         
         % get the stimulus and the rest of info of the current trial
         thisitem        = runitems(itrial,1);
-        thisanimacy     = animacy(itrial,1);
-        thiscategory    = category(itrial,1);        
+        ianimacy        = animacy(itrial,1);
+        icategory       = category(itrial,1);     
         
         Screen('DrawTexture', window, texture{thisitem}, [], destrect);     % display thisitem
-        imageon = Screen('Flip', window, objecton - slack);                 % here the current image (thisitem) is fliped
+        fliptime    = Screen('Flip', window, objectoff - slack);            % here the current image (thisitem) is fliped
+        objectstart = fliptime;
         
-        trialstart  = imageon - runstart;                                   % timestamp of the begining of the trial
-        imageoff    = imageon + imgduration - ifi;                          % image on for 200 ms
+        trialstart  = fliptime - runstart;                                  % timestamp of the begining of the trial
+        objectoff   = fliptime + imgduration - ifi;                         % image on for 200 ms
         
         % show fixation and collect response 
         Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
-        fixon = Screen('Flip', window, imageoff - slack);                   % fixation on until response is made or for 1.5 sec
+        fliptime = Screen('Flip', window, objectoff - slack);               % fixation on until response is made or for 1.5 sec
         
-        % Get keypress response
-        rt      = 0;
-        answer  = 0;
-        correct = 0;
+        fprintf('image was on for %3.4f\n', fliptime - objectstart);        % from the first flip until the next
+        
+        % Collect keypress response
         resp_input   = 0;
-         
-        while resp_input == 0 && (GetSecs - fixon) < responsetime 
+        
+        while resp_input == 0 && (GetSecs - fliptime) < responsetime 
             [keyisdown, secs, keycode] = KbCheck;
             pressedKeys = find(keycode);
             
             % check the response key
             if isempty(pressedKeys) % if subject didn't press any key
-                resp_input       = 0; 
+                resp_input  = 0; 
                 rt          = nan;
                 answer      = nan;
                 respmade    = GetSecs;
                 
             elseif ~isempty(pressedKeys) % if subjects pressed a valid key
                 
-                if keycode(1,animatekey) % subject pressed the animate key
-                    resp_input       = animatekey;
-                    rt          = secs - fixon;
+                if keycode(1,keys.animatekey) % subject pressed the animate key
+                    resp_input  = keys.animatekey;
+                    rt          = secs - fliptime;
                     answer      = 1; % animate
                     respmade    = secs;
                     
-                elseif keycode(1,inanimatekey) % subject pressed the inanimate key
-                    resp_input       = inanimatekey;
-                    rt          = secs - fixon;
+                elseif keycode(1,keys.inanimatekey) % subject pressed the inanimate key
+                    resp_input  = keys.inanimatekey;
+                    rt          = secs - fliptime;
                     answer      = 2; % inanimate
                     respmade    = secs;
                     
-                elseif keycode(1,esckey)
-                    resp_input       = esckey;
+                elseif keycode(1,keys.esckey)
+                    resp_input  = keys.esckey;
                     rt          = nan;
                     answer      = nan;
                     respmade    = nan;
@@ -156,11 +159,20 @@ if taskNb == 1 % if the task is RTS
         
         end % end of response while loop
         
-        correct = answer == thisanimacy; % check if response is correct
+        correct = answer == ianimacy; % check if response is correct
         
-        objecton = respmade + responsetime - ifi;
+        objectoff = respmade + .200 + randperm(jitter*1000,1)/1000 - ifi;
         
         % save trial info
+        runtrials(itrial).trialNb       = itrial;
+        runtrials(itrial).item          = thisitem;
+        runtrials(itrial).trialstart    = trialstart;
+        runtrials(itrial).animacy       = ianimacy;
+        runtrials(itrial).category      = icategory;
+        runtrials(itrial).rt            = rt;
+        runtrials(itrial).answer        = answer;
+        runtrials(itrial).correct       = correct;
+        runtrials(itrial).run           = run;
     
     end % end of RTS trials loop
     
@@ -235,19 +247,18 @@ elseif taskNb == 2 % if it is ab
 
     end
     
-    %  get the 'ab' related keys 
-    option1     = keys.option1; % upper left option
-    option2     = keys.option2; % uper right option
-    option3     = keys.option3; % middle option
-    
+   
     %% start the current run 
+    
+    % create a structure to store the trial info     
+    runtrials       = [];
     
     % start the run with the fixation cross
     Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
-    fliptime    = Screen('Flip', window); % flip fixation window
-    runstart    = fliptime;
+    fliptime        = Screen('Flip', window); % flip fixation window
+    runstart        = fliptime;
     
-    objectoff   = fliptime + iti + randperm(jitter*1000,1)/1000 - ifi;
+    objectoff       = fliptime + iti + randperm(jitter*1000,1)/1000 - ifi;
     
     for itrial = 1:nbtrials
         
@@ -372,42 +383,48 @@ elseif taskNb == 2 % if it is ab
         
         resp_input = 0;
         % collect response 
-        while resp_input == 0 && (GetSecs - fliptime) < responsetime - ifi
-            [~, secs, keycode] = KbCheck;
-            if keycode(1,keys.option1) % subject pressed key 1
-                resp_input  = keys.option1;
-                rt          = secs - fliptime;
-                answer      = t1options(1); % left option
-                respmade    = secs;
-
-            elseif keycode(1,keys.option2) % subject pressed key 2
-                resp_input  = keys.option2;
-                rt          = secs - fliptime;
-                answer      = t1options(2); % middle option
-                respmade    = secs;
-
-            elseif keycode(1,keys.option3) % subject pressed key 3
-                resp_input  = keys.option3;
-                rt          = secs - fliptime;
-                answer      = t1options(3); % right option
-                respmade    = secs;
-
-            elseif keycode(1,keys.esckey)
-                resp_input  = keys.esckey;
-                rt          = nan;
-                answer      = nan;
-                respmade    = nan;
-                abort       = 1;
-                break
-                
-            else
-                resp_input  = 0; 
-                rt          = nan;
-                answer      = nan;
-                respmade    = GetSecs;
-                
-            end % end of key press if statement
+        while resp_input == 0 && (GetSecs - fliptime) < responsetime 
+            [keyisdown, secs, keycode] = KbCheck;
+            pressedKeys = find(keycode);
             
+            % check the response key
+            if isempty(pressedKeys) % if subject didn't press any key
+                resp_input      = 0; 
+                rt              = nan;
+                answer          = nan;
+                respmade        = GetSecs;
+                
+            elseif ~isempty(pressedKeys) % if subjects pressed a valid key
+                
+                if keycode(1,keys.option1) % subject pressed key 1
+                    resp_input  = keys.option1;
+                    rt          = secs - fliptime;
+                    answer      = t1options(1); % left option
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.option2) % subject pressed key 2
+                    resp_input  = keys.option2;
+                    rt          = secs - fliptime;
+                    answer      = t1options(2); % middle option
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.option3) % subject pressed key 3
+                    resp_input  = keys.option3;
+                    rt          = secs - fliptime;
+                    answer      = t1options(3); % right option
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.esckey)
+                    resp_input  = keys.esckey;
+                    rt          = nan;
+                    answer      = nan;
+                    respmade    = nan;
+                    abort       = 1;
+                    break
+                end % end of key press if statement
+           
+            end % end of response if statement
+        
         end % end of response while loop
         
         
@@ -443,42 +460,49 @@ elseif taskNb == 2 % if it is ab
         fliptime = Screen('Flip',window, objectoff); % 
         
         resp_input = 0;
-        while resp_input == 0 && (GetSecs - fliptime) < responsetime - ifi
-            [~, secs, keycode] = KbCheck;
-            if keycode(1,keys.option1) % subject pressed key 1
-                resp_input  = keys.option1;
-                rt          = secs - fliptime;
-                answer      = t1options(1); % left option
-                respmade    = secs;
-
-            elseif keycode(1,keys.option2) % subject pressed key 2
-                resp_input  = keys.option2;
-                rt          = secs - fliptime;
-                answer      = t1options(2); % middle option
-                respmade    = secs;
-
-            elseif keycode(1,keys.option3) % subject pressed key 3
-                resp_input  = keys.option3;
-                rt          = secs - fliptime;
-                answer      = t1options(3); % right option
-                respmade    = secs;
-
-            elseif keycode(1,keys.esckey)
-                resp_input  = keys.esckey;
-                rt          = nan;
-                answer      = nan;
-                respmade    = nan;
-                abort       = 1;
-                break
-                
-            else
-                resp_input  = 0; 
-                rt          = nan;
-                answer      = nan;
-                respmade    = GetSecs;
-                
-            end % end of key press if statement
+        % collect response 
+        while resp_input == 0 && (GetSecs - fliptime) < responsetime 
+            [keyisdown, secs, keycode] = KbCheck;
+            pressedKeys = find(keycode);
             
+            % check the response key
+            if isempty(pressedKeys) % if subject didn't press any key
+                resp_input      = 0; 
+                rt              = nan;
+                answer          = nan;
+                respmade        = GetSecs;
+                
+            elseif ~isempty(pressedKeys) % if subjects pressed a valid key
+                
+                if keycode(1,keys.option1) % subject pressed key 1
+                    resp_input  = keys.option1;
+                    rt          = secs - fliptime;
+                    answer      = t2options(1); % left option
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.option2) % subject pressed key 2
+                    resp_input  = keys.option2;
+                    rt          = secs - fliptime;
+                    answer      = t2options(2); % middle option
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.option3) % subject pressed key 3
+                    resp_input  = keys.option3;
+                    rt          = secs - fliptime;
+                    answer      = t2options(3); % left option
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.esckey)
+                    resp_input  = keys.esckey;
+                    rt          = nan;
+                    answer      = nan;
+                    respmade    = nan;
+                    abort       = 1;
+                    break
+                end % end of key press if statement
+           
+            end % end of response if statement
+        
         end % end of response while loop
         
         t2rt        = rt;
@@ -492,7 +516,7 @@ elseif taskNb == 2 % if it is ab
         % display fixation cross and wait for next trial
         Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
         fliptime    = Screen('Flip', window, objectoff - slack); 
-        objectoff   = fliptime + iti + ifi; % give subject a few seconds before moving to the next trial
+        objectoff   = fliptime + (4*isi) + randperm(jitter*1000,1)/1000 - ifi; % give subject a few miliseconds before moving to the next trial
         
         % save trial info in a mat file
         runtrials(itrial).trialNb   = itrial;
