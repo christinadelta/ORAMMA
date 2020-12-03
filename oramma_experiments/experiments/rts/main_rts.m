@@ -13,39 +13,40 @@
 % MATLAB VERSION 2020a
 % Psychophysics toolbox 3
 
-%% ------ experiment setup ----------- %%
-
-% Clear the workspace and screen
-sca;
-close all;
-clearvars;
-clc;
-
-% create a user input dialog to gather information
-prompt      = {'Enter task name (e.g. rts):','Enter subject number (e.g. 01:'};
-dlgtitle    = 'Info window';
-dims        = [1 30];
-definput    = {'rts','01'}; % this is a default input (this should change)
-answer      = inputdlg(prompt,dlgtitle,dims,definput);
-init        = answer;
+%% ------ initial experimental setup ----------- %%
 
 % Initialize the random number generator
 rand('state', sum(100*clock)); 
 
-% experimental settings
-basedir         = pwd;
+% get participant nb and task name 
+answer          = startup.answer;
+
+% initial experimental settings
 PNb             = str2num(answer{2}); % participant number
+taskName        = answer{1}; 
 taskNb          = 1; % task number
+basedir         = pwd;
 
 % get directories and add utility functions to the path
 workingdir      = fullfile(basedir, 'oramma_experiments');
 addpath(genpath(fullfile(workingdir,'utilities')));                         % add subfunctions to the path
 
 
+%% --------- Set output info and logs file ------------ %%
+
+logs.PNb            = PNb;
+logs.task           = taskName;
+logs.date           = datestr(now, 'ddmmyy');
+logs.time           = datestr(now, 'hhmm');
+
+logs.output         = 'subject_%02d_task_%s_run_%02d_logs.mat';
+
 % % setup study output file
-% resultsfolder       = fullfile(set.workingdir, 'results');
-% outputfile          = fopen([resultsfolder '/resultfile_' num2str(set.PNb) '.txt'],'a');
-% fprintf(outputfile, 'subID\t imageSet\t trial\t textItem\t imageOrder\t response\t RT\n');
+logs.resultsfolder  = fullfile(workingdir, 'results',taskName, sprintf('sub-%02d', PNb));
+
+if ~exist(logs.resultsfolder, 'dir')
+    mkdir(logs.resultsfolder)
+end
 
 
 %% --------------- RUN A FEW IMPORTANT UTIL FUNCTIONS ----------------- %%
@@ -106,8 +107,8 @@ try
     
     % Start instructions
     DrawFormattedText(window,'Pay attentions to the instructions','center','center',scrn.white);
-    runstart = Screen('Flip', window);
-    requested_runstart = runstart + 2;
+    expstart = Screen('Flip', window);
+    duration = expstart + 2;
     
     % display instructions 
     instructions = Screen('OpenOffscreenWindow', window, windrect);
@@ -120,7 +121,7 @@ try
     
     % copy the instructions window  and flip.
     Screen('CopyWindow',instructions,window,windrect, windrect);
-    runstart = Screen('Flip', window, requested_runstart);
+    Screen('Flip', window, duration);
     
     % WAIT FOR THEM TO PRESS SPACE
     waitforresp = 1;
@@ -147,11 +148,10 @@ try
             Screen('TextSize', window, scrn.textsize);
             Screen('FillRect', window, scrn.grey ,windrect);
             DrawFormattedText(window, sprintf('Great! Starting run %d',run), 'center', 'center', scrn.white);
-            runstart = Screen('Flip', window); 
+            Screen('Flip', window); 
             WaitSecs(3); % wait for three secs before starting the 1st run
             
-            set.run = run;
-            set     = RunTrials(set, trials, scrn, keys); 
+            [set, logs]     = RunTrials(set, trials, scrn, run, logs); 
             
         elseif run > 1
             
@@ -160,7 +160,7 @@ try
             Screen('FillRect', window, scrn.grey ,windrect);
             DrawFormattedText(window, 'Time for a break! When ready to continue, press SPACE', 'center', scrn.ycenter-50, scrn.white);
             DrawFormattedText(window, 'If you want to quit, press ESC.', 'center', 'center', scrn.white);
-            runstart = Screen('Flip', window); 
+            Screen('Flip', window); 
             
             waitforresp = 1;
             while waitforresp
@@ -181,14 +181,13 @@ try
                     Screen('TextSize', window, scrn.textsize);
                     Screen('FillRect', window, scrn.grey ,windrect);
                     DrawFormattedText(window, sprintf('Great! Starting run %d',run), 'center', 'center', scrn.white);
-                    runstart = Screen('Flip', window); 
+                    Screen('Flip', window); 
                     WaitSecs(3)
                     
                     waitforresp = 0;
                     
                     % start next run
-                    set.run = run;
-                    set     = RunTrials(set, trials, scrn, keys); 
+                    [set,logs]     = RunTrials(set, trials, scrn, run, logs); 
                 end % 
                 
             end % end of waiting while loop
@@ -202,7 +201,7 @@ try
     Screen('OpenOffscreenWindow', window, windrect);
     Screen('TextSize', window, scrn.textsize);
     Screen('FillRect', window, scrn.grey ,windrect);
-    vbl = DrawFormattedText(window, 'This is the end of the experiment. Thank you for your time', 'center', 'center', scrn.white);
+    DrawFormattedText(window, 'This is the end of the experiment. Thank you for your time', 'center', 'center', scrn.white);
     Screen('Flip',window);
     WaitSecs(3);
     

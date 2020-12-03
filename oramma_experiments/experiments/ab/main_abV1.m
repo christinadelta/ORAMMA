@@ -13,7 +13,6 @@
 % MATLAB VERSION 2020a
 % Psychophysics toolbox 3
 
-% ----------------------------------------------
 
 %% ------ initial experimental setup ----------- %%
 
@@ -35,7 +34,8 @@ workingdir      = fullfile(basedir, 'oramma_experiments');
 addpath(genpath(fullfile(workingdir,'utilities')));                         % add subfunctions to the path
 
 
-% define a few parameters that wil go to the log files
+%% --------- Set output info and logs file ------------ %%
+
 logs.PNb            = PNb;
 logs.task           = taskName;
 logs.date           = datestr(now, 'ddmmyy');
@@ -109,7 +109,7 @@ try
     % Start instructions
     DrawFormattedText(window,'Pay attentions to the instructions','center','center',scrn.white);
     expstart = Screen('Flip', window);
-    exp_duration = expstart + 2;
+    duration = expstart + 2;
     
     % display instructions 
     instructions = Screen('OpenOffscreenWindow', window, windrect);
@@ -124,7 +124,7 @@ try
      
     % copy the instructions window  and flip.
     Screen('CopyWindow',instructions,window,windrect, windrect);
-    Screen('Flip', window, exp_duration);
+    Screen('Flip', window, duration);
     
     % WAIT FOR THEM TO PRESS SPACE
     waitforresp = 1;
@@ -154,7 +154,7 @@ try
             Screen('Flip', window); 
             WaitSecs(3); % wait for three secs before starting the 1st run
             
-            [set,logs, keys]     = RunTrials(set, trials, scrn, keys, run, logs); 
+            [set,logs]     = RunTrials(set, trials, scrn, run, logs); 
             
         elseif run > 1
             
@@ -188,9 +188,8 @@ try
                     WaitSecs(3)
                     
                     waitforresp = 0;
-                    
                     % start next run
-                    [set,logs, keys]     = RunTrials(set, trials, scrn, keys, run, logs); 
+                    [set,logs]     = RunTrials(set, trials, scrn, run, logs); 
                 end % 
                 
             end % end of waiting while loop
