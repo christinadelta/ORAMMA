@@ -154,7 +154,7 @@ try
             Screen('Flip', window); 
             WaitSecs(3); % wait for three secs before starting the 1st run
             
-            [set,logs]     = RunTrials(set, trials, scrn, keys, run, logs); 
+            [set,logs, keys]     = RunTrials(set, trials, scrn, keys, run, logs); 
             
         elseif run > 1
             
@@ -169,10 +169,10 @@ try
             while waitforresp
                 
                 keyisdown = 0;
-                    while ~keyisdown
-                        [keyisdown,secs,keycode] = KbCheck;
-                        WaitSecs(0.001) % delay to prevent CPU logging
-                    end
+                while ~keyisdown
+                    [keyisdown,secs,keycode] = KbCheck;
+                    WaitSecs(0.001) % delay to prevent CPU logging
+                end
                 if keycode(keys.esckey)
                     abort = 1;
                     waitforresp = 0;
@@ -190,7 +190,7 @@ try
                     waitforresp = 0;
                     
                     % start next run
-                    [set,logs]     = RunTrials(set, trials, scrn, keys, run, logs); 
+                    [set,logs, keys]     = RunTrials(set, trials, scrn, keys, run, logs); 
                 end % 
                 
             end % end of waiting while loop
