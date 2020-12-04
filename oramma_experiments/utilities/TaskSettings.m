@@ -62,6 +62,23 @@ elseif taskNb == 2
     set.post2       = [7 12];   % potential posiitons of the 2nd target (T2)- lag 2 and lag 7
     set.delay       = 0.8;      % 800ms delay between the end of RSVP until 1st response window
     set.respdelay   = 0.3;      % 300ms delay between 1st and 2nd response windows
+    
+elseif taskNb == 3
+    
+    % BASIC IMPORTANT SETTINGS
+    set.name        = 'pw'; % task name
+    set.runs        = 2; % number of blocks (or runs)
+    set.break       = 5; % default break between runs
+    set.EEG         = 0; % set to 1 when in testing room
+    set.MEG         = 0; % set to 1 when in testing room
+    
+    % EXPERIMENTAL SETTINGS
+    set.duration    = .500; % stimulus duration = 500 ms
+    set.response    = 1.5;  % response time in seconds
+    set.isi         = 2;  % in seconds
+    set.jitter      = .2;   % 200 ms
+    
+    
 
 end % end of if statement
 

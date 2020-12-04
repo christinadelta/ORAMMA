@@ -539,6 +539,148 @@ elseif taskNb == 2 % if it is ab
         runtrials(itrial).run       = run;
         
     end % end of trials loop
+    
+elseif taskNb == 3
+    
+    
+    allitems        = set.allitems;     % all the stimuli numbers (e.g. 36) 
+    data            = set.data;         % data (images) to make textures 
+    imgduration     = set.duration;     % stimulus duration
+    
+    % make textures of the images
+    texture         = cell(1,allitems);
+
+    for i = 1:allitems
+
+        texture{i} = Screen('MakeTexture', window, data(i).file); 
+
+    end
+    
+    set.texture = texture;
+
+    
+    % store the different image information of the current run in separate arrays
+    runitems        = currentlist(:,1);
+    animacy         = currentlist(:,2);
+    category        = currentlist(:,3);
+    trialtype       = currentlist(:,4);
+    
+    %% start the current run
+    
+    % create a structure to store the trial info     
+    runtrials   = [];
+    
+    % start the run with the fixation cross
+    Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
+    fliptime    = Screen('Flip', window); % flip fixation window
+    runstart    = fliptime;
+    
+    objectoff = runstart + isi + randperm(jitter*1000,1)/1000 - ifi;
+    
+    % loop through the current trial list
+    for itrial = 1:nbtrials
+        
+        % get the stimulus and the rest of info of the current trial
+        thisitem        = runitems(itrial,1);
+        ianimacy        = animacy(itrial,1);
+        icategory       = category(itrial,1);  
+        itrialtype       = trialtype(itrial,1);
+        
+        if itrialtype == 1 % show item
+            
+            Screen('DrawTexture', window, texture{thisitem}, [], destrect);     % display thisitem
+            fliptime    = Screen('Flip', window, objectoff - slack);            % here the current image (thisitem) is fliped
+            objectstart = fliptime;
+        
+            trialstart  = fliptime - runstart;                                  % timestamp of the begining of the trial
+            objectoff   = fliptime + imgduration - ifi;                         % image on for 500 ms
+        
+            % show fixation and collect response 
+            Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
+            fliptime    = Screen('Flip', window, objectoff - slack);               % fixation on until response is made or for 1.5 sec
+        
+            fprintf('image was on for %3.4f\n', fliptime - objectstart);        % from the first flip until the next
+            
+            objectoff   = fliptime + responsetime + randperm(jitter*1000,1)/1000 - ifi;
+            
+            % if it is a passive viewving trial, subject doesn't respond,
+            % so the default for answer and correct is set to 1.
+            rt          = 0;
+            answer      = 1;
+            correct     = 1;
+            
+        elseif itrialtype == 2 % show paperclip
+            
+            
+            Screen('DrawTexture', window, texture{thisitem}, [], destrect);     % display thisitem
+            fliptime    = Screen('Flip', window, objectoff - slack);            % here the current image (thisitem) is fliped
+            objectstart = fliptime;
+
+            trialstart  = fliptime - runstart;                                  % timestamp of the begining of the trial
+            objectoff   = fliptime + imgduration - ifi;                         % image on for 200 ms
+
+            % show fixation and collect response 
+            Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
+            fliptime = Screen('Flip', window, objectoff - slack);               % fixation on until response is made or for 1.5 sec
+
+            fprintf('image was on for %3.4f\n', fliptime - objectstart);        % from the first flip until the next
+
+            % Collect keypress response
+            resp_input   = 0;
+
+            while resp_input == 0 && (GetSecs - fliptime) < responsetime 
+                [keyisdown, secs, keycode] = KbCheck;
+                pressedKeys = find(keycode);
+
+                % check the response key
+                if isempty(pressedKeys) % if subject didn't press any key
+                    resp_input  = 0; 
+                    rt          = nan;
+                    answer      = nan;
+                    respmade    = GetSecs;
+
+                elseif ~isempty(pressedKeys) % if subjects pressed a valid key
+
+                    if keycode(1,keys.option1) % subject pressed the animate key
+                        resp_input  = keys.option1;
+                        rt          = secs - fliptime;
+                        answer      = 1; % paperclip
+                        respmade    = secs;
+
+                    elseif keycode(1,keys.esckey)
+                        resp_input  = keys.esckey;
+                        rt          = nan;
+                        answer      = nan;
+                        respmade    = nan;
+                        abort       = 1;
+                        break
+                    end % end of key press if statement
+
+                end % end of response if statement
+
+            end % end of response while loop
+
+            correct = answer == 1; % check if response is correct
+            
+            objectoff = respmade + .200 + randperm(jitter*1000,1)/1000 - ifi;
+            
+        end
+        
+        % save trial info
+        runtrials(itrial).trialNb       = itrial;
+        runtrials(itrial).item          = thisitem;
+        runtrials(itrial).trialstart    = trialstart;
+        runtrials(itrial).animacy       = ianimacy;
+        runtrials(itrial).category      = icategory;
+        runtrials(itrial).trialtype     = itrialtype;
+        runtrials(itrial).rt            = rt;
+        runtrials(itrial).answer        = answer;
+        runtrials(itrial).correct       = correct;
+        runtrials(itrial).run           = run;
+        
+        
+    end % end of run trials loop
+    
  
 end % end of task number statement 
 

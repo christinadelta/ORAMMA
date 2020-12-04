@@ -50,6 +50,17 @@ elseif taskNb == 2
     keys.spacekey   = KbChecklist(4); % '4'- space
     keys.esckey     = KbChecklist(5); % '5'- escape
     
+elseif taskNb == 3
+    
+    responsekey = '1!';
+    
+    KbChecklist = [KbName(responsekey),KbChecklist];
+    RestrictKeysForKbCheck(KbChecklist);
+    
+    keys.option1    = KbChecklist(1); % '1'- paperclip response
+    keys.spacekey   = KbChecklist(2); % '2'- space
+    keys.esckey     = KbChecklist(3); % '3'- escape
+    
     
 end % end of if statement
 

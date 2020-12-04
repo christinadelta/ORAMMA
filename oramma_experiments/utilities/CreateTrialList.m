@@ -91,7 +91,39 @@ elseif taskNb == 2 % if task is ab
     trials.runtrials    = runtrials; % add runtrials to the trials struct (we'll use this when running trials)
     
     clear temp randomizedlist  
-
+    
+elseif taskNb == 3 % if task is passive viewing 
+    
+    itemreps            = 10; % how many times will each item be presented?
+    itemtrials          = length(set.item(1:end-1)) * itemreps;
+    distractorprop      = 0.2;
+    distractortrials    = itemtrials * distractorprop;
+    trialtype           = ones(length(set.item(1:end-1)),1);
+    
+    listoftrials        = repmat(cat(2, set.item(1:end-1), set.animacy(1:end-1), set.category(1:end-1), trialtype),itemreps,1); % create total trial list
+    
+    runtrials       = length(listoftrials)/set.runs; % how many trials per run? 
+    rundistractors  = distractortrials /set.runs; % how many distractors per run? 
+    
+    randomizedlist  = listoftrials(randperm(length(listoftrials)),:); % randomize original trial list
+    
+    temp            = 0; % used to split trials in runs 
+       
+    % split trials in runs 
+    for i = 1:set.runs
+        
+        trials.list{i}      = randomizedlist(1 + temp:runtrials * i,:); 
+        listofdistractors   = repmat(cat(2, set.item(end),set.animacy(end),set.category(end), 2),rundistractors,1); % create total trial list
+        trials.list{i}      = cat(1,trials.list{i}, listofdistractors);
+        trials.list{i}      = trials.list{i}(randperm(length(trials.list{i})),:);
+        
+        temp                = temp + runtrials;
+        
+    end % end of for loop
+    
+    trials.runtrials        = runtrials + rundistractors; % add runtrials to the trials struct (we'll use this when running trials)
+    
+ 
 end % end of if statement 
 
 
