@@ -65,6 +65,12 @@ switch getpath
         addpath(genpath(taskpath));
         main_pw
         
+    case 'posner'
+        
+        taskpath = fullfile(workingpath, 'posner');
+        addpath(genpath(taskpath));
+        posner_main
+        
     otherwise
         
         disp('wrong task name, try again!');
