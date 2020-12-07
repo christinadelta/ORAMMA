@@ -681,7 +681,162 @@ elseif taskNb == 3
         
     end % end of run trials loop
     
- 
+elseif taskNb == 4 % if it is the posner task
+    
+    allitems        = set.allitems;       % all the stimuli numbers (e.g. 36) 
+    data            = set.data;           % data (images) to make textures 
+    imgduration     = set.cueduration;       % cue duration
+    targetduration  = set.targetduration; % target duration
+    
+    % make textures of the images
+    texture         = cell(1,allitems);
+
+    for i = 1:allitems
+
+        texture{i} = Screen('MakeTexture', window, data(i).file); 
+
+    end
+    
+    set.texture = texture;
+
+    
+    % store the different image information of the current run in separate arrays
+    runcues        = currentlist(:,1);
+    trialtype      = currentlist(:,2);  
+    
+    %% define the x & y positions of the 3 response options on screen and screate Offscreen windows for flipping
+    [x, y, r]   = CalculateObjectDest(imagewidth, windrect);  
+    
+    leftrect = [xcenter-x/2.05-imagewidth/2 ycenter+y/500-imageheight/2 xcenter-x/2.05+imagewidth/2 ycenter+y/500+imageheight/2];
+    rightrect = [xcenter+x/2.05-imagewidth/2 ycenter+y/500-imageheight/2 xcenter+x/2.05+imagewidth/2 ycenter+y/500+imageheight/2];
+    allrects    = [leftrect; rightrect]';
+    
+    %% start the current run
+    
+    % create a structure to store the trial info     
+    runtrials   = [];
+    
+    % start the run with the fixation cross
+    Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
+    fliptime    = Screen('Flip', window); % flip fixation window
+    runstart    = fliptime;
+    
+    objectoff = runstart + isi + randperm(jitter*1000,1)/1000 - ifi;
+    
+    % loop through the current trial list
+    for itrial = 1:nbtrials
+        
+        % get the stimulus and the rest of info of the current trial
+        thiscue        = runcues(itrial,1);
+        valid           = trialtype(itrial,1);
+        target          = 3;
+        
+        % first show the cue
+        Screen('DrawTexture', window, texture{thiscue}, [], destrect);     % display thisitem
+        fliptime    = Screen('Flip', window, objectoff - slack);            % here the current image (thisitem) is fliped
+        objectstart = fliptime;
+
+        trialstart  = fliptime - runstart;                                  % timestamp of the begining of the trial
+        objectoff   = fliptime + imgduration - ifi;                         % image on for 200 ms
+        
+        
+        if thiscue == 1
+            if valid == 1
+                
+                % first show the cue
+                Screen('DrawTexture', window, texture{target}, [], leftrect);     % display target at valid location
+                fliptime    = Screen('Flip', window, objectoff - slack); 
+                
+            else
+                % first show the cue
+                Screen('DrawTexture', window, texture{target}, [], rightrect);     % display target at invalid location
+                fliptime    = Screen('Flip', window, objectoff - slack); 
+                
+            end
+            
+        elseif thiscue == 2
+            if valid == 1
+                
+                % first show the cue
+                Screen('DrawTexture', window, texture{target}, [], rightrect);     % display target at valid location
+                fliptime    = Screen('Flip', window, objectoff - slack); 
+                
+            else
+                % first show the cue
+                Screen('DrawTexture', window, texture{target}, [], leftrect);     % display target at invalid location
+                fliptime    = Screen('Flip', window, objectoff - slack); 
+                
+            end
+        end
+        
+        fprintf('image was on for %3.4f\n', fliptime - objectstart);        % from the first flip until the next
+        
+        objectoff   = fliptime + targetduration - ifi;                      % target on for 200 ms
+        
+        % return to fixation
+        Screen('CopyWindow', fixationdisplay,window, windrect, windrect)
+        fliptime    = Screen('Flip', window, objectoff - slack); 
+        
+        fprintf('image was on for %3.4f\n', fliptime - objectoff);        % from the first flip until the next
+
+        % Collect keypress response
+        resp_input   = 0;
+        
+        while resp_input == 0 && (GetSecs - fliptime) < responsetime 
+            [keyisdown, secs, keycode] = KbCheck;
+            pressedKeys = find(keycode);
+            
+            % check the response key
+            if isempty(pressedKeys) % if subject didn't press any key
+                resp_input  = 0; 
+                rt          = nan;
+                answer      = nan;
+                respmade    = GetSecs;
+                
+            elseif ~isempty(pressedKeys) % if subjects pressed a valid key
+                
+                if keycode(1,keys.left) % subject pressed the left arrow
+                    resp_input  = keys.left;
+                    rt          = secs - fliptime;
+                    answer      = 1; % arrow left 
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.right) % subject pressed the right arrow
+                    resp_input  = keys.right;
+                    rt          = secs - fliptime;
+                    answer      = 2; % arrow right
+                    respmade    = secs;
+                    
+                elseif keycode(1,keys.esckey)
+                    resp_input  = keys.esckey;
+                    rt          = nan;
+                    answer      = nan;
+                    respmade    = nan;
+                    abort       = 1;
+                    break
+                end % end of key press if statement
+           
+            end % end of response if statement
+        
+        end % end of response while loop
+        
+        correct = answer == valid;
+        
+        objectoff = respmade + .200 + randperm(jitter*1000,1)/1000 - ifi;
+        
+        % save trial info
+        runtrials(itrial).trialNb       = itrial;
+        runtrials(itrial).cue           = thiscue;
+        runtrials(itrial).trialstart    = trialstart;
+        runtrials(itrial).valid         = valid;
+        runtrials(itrial).rt            = rt;
+        runtrials(itrial).answer        = answer;
+        runtrials(itrial).correct       = correct;
+        runtrials(itrial).run           = run;
+
+    end % end of trials loop
+    
+    
 end % end of task number statement 
 
 % save run and trials in the log file
@@ -692,8 +847,6 @@ sublog          = fullfile(logs.resultsfolder,sprintf(logs.output,logs.PNb,logs.
 save(sublog,'logs');
 
 WaitSecs(2);
-
-
 
 
 end

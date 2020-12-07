@@ -61,9 +61,18 @@ elseif taskNb == 3
     keys.spacekey   = KbChecklist(2); % '2'- space
     keys.esckey     = KbChecklist(3); % '3'- escape
     
+elseif taskNb == 4
+    
+    responsekeys    = {'LeftArrow','RightArrow'};
+    
+    KbChecklist = [KbName(responsekeys),KbChecklist];
+    RestrictKeysForKbCheck(KbChecklist);
+    
+    keys.left       = KbChecklist(1); % 'left arrow'
+    keys.right      = KbChecklist(2); % 'right arrow'
+    keys.spacekey   = KbChecklist(3); % space
+    keys.esckey     = KbChecklist(3); % escape
     
 end % end of if statement
-
-
 
 end

@@ -163,6 +163,36 @@ elseif taskNb == 3
     
     clear image data raw vars
     
+elseif taskNb == 4
+    
+    % get the correct stimuli
+    task_stimuli        = fullfile(imgdir, 'posner_stimuli');
+
+    % read the excel file
+    [vars,~,raw]      = xlsread(fullfile(exceldir, 'posner_stimset.xls'));
+    
+    % remove the headers
+    vars(headers,:)     = [];
+    raw(headers,:)      = [];
+    
+    data                = [];
+    set.allitems        = length(raw);  
+    
+    for i=1:length(raw)
+
+            Img             = fullfile(task_stimuli,raw{i});
+            image           = imread(Img);
+            data(i).file    = imresize(image,[set.stimsize set.stimsize]); % should resize or not?
+
+    end
+    
+    % update settings structure
+    set.data        = data;
+
+    set.stimw       = size(data(1).file,1);   % width of objects
+    set.stimh       = set.stimw;              % height of objects
+    
+    clear image data raw vars
     
 end % end of task if statement
 

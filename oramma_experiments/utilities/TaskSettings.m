@@ -24,6 +24,11 @@ set.stimdeg     = 5;    % stimulus visual angle
 set.stimsize    = 200;  % should resize to 220x200 or leave it as 252x252?
 set.fixation    = '+';  % fixation cross 
 
+% BASIC IMPORTANT SETTINGS
+set.EEG         = 0; % set to 1 when in testing room
+set.MEG         = 0; % set to 1 when in testing room
+    
+
 
 if taskNb == 1
     
@@ -33,8 +38,6 @@ if taskNb == 1
     set.name        = 'rts'; % task name
     set.runs        = 2; % number of blocks (or runs)
     set.break       = 5; % default break between runs
-    set.EEG         = 0; % set to 1 when in testing room
-    set.MEG         = 0; % set to 1 when in testing room
 
     % EXPERIMENTAL SETTINGS
     set.duration    = .200; % stimulus duration = 200 ms
@@ -48,9 +51,6 @@ elseif taskNb == 2
     set.name        = 'ab'; % task name
     set.runs        = 8; % number of blocks (or runs)
     set.break       = 5; % default break between runs
-    set.EEG         = 0; % set to 1 when in testing room
-    set.MEG         = 0; % set to 1 when in testing room
-    
 
     % EXPERIMENTAL SETTINGS
     set.iti         = 3.5;      % RSVP duration + responses 
@@ -69,8 +69,6 @@ elseif taskNb == 3
     set.name        = 'pw'; % task name
     set.runs        = 2; % number of blocks (or runs)
     set.break       = 5; % default break between runs
-    set.EEG         = 0; % set to 1 when in testing room
-    set.MEG         = 0; % set to 1 when in testing room
     
     % EXPERIMENTAL SETTINGS
     set.duration    = .500; % stimulus duration = 500 ms
@@ -78,8 +76,20 @@ elseif taskNb == 3
     set.isi         = 2;  % in seconds
     set.jitter      = .2;   % 200 ms
     
+elseif taskNb == 4 
     
-
+    % BASIC IMPORTANT SETTINGS
+    set.name        = 'posner'; % task name
+    set.runs        = 10; % number of blocks (or runs)
+    set.break       = 5; % default break between runs
+    
+    % EXPERIMENTAL SETTINGS
+    set.cueduration     = .200; % arrow duration = 200 ms
+    set.targetduration  = .200; % target duration = 200 ms
+    set.response        = 1.1;  % response time in seconds
+    set.isi             = 2;  % in seconds
+    set.jitter          = .2;   % 200 ms
+    
 end % end of if statement
 
 

@@ -123,8 +123,35 @@ elseif taskNb == 3 % if task is passive viewing
     
     trials.runtrials        = runtrials + rundistractors; % add runtrials to the trials struct (we'll use this when running trials)
     
- 
+elseif taskNb == 4
+    
+    cuereps = 100;
+    
+    items = [1;2;1;2];
+    valid = [1;1;2;2];
+    triallist = repmat(cat(2,items,valid),cuereps,1);
+    
+    runtrials       = length(triallist)/set.runs; % how many trials per run? 
+    randomizedlist  = triallist(randperm(length(triallist)),:); % randomize original trial list
+    
+    temp            = 0; % used to split trials in runs 
+    
+    % split trials in runs 
+    for i = 1:set.runs
+        
+        trials.list{i}  = randomizedlist(1 + temp:runtrials * i,:); 
+        
+        temp            = temp + runtrials;
+        
+    end % end of for loop
+    
+    trials.runtrials    = runtrials; % add runtrials to the trials struct (we'll use this when running trials)
+    
+    clear temp randomizedlist  
+    
 end % end of if statement 
+    
+    
 
 
 end
