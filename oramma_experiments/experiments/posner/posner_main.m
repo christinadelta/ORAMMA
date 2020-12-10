@@ -49,29 +49,32 @@ if ~exist(logs.resultsfolder, 'dir')
     mkdir(logs.resultsfolder)
 end
 
+% Add PTB to your path and start the experiment 
+ptbdir          = '/Applications/Psychtoolbox'; % change to your ptb directory
+addpath(genpath(ptbdir))
 
-%% --------------- RUN A FEW IMPORTANT UTIL FUNCTIONS ----------------- %%
-
-set                 = TaskSettings(taskNb);                                 % Define the first task specific parameters
-
-keys                = DefineKeys(taskNb);                                   % Define keys of the task
-
-scrn                = screenSettings(set);                                  % Define screen setup
-
-set                 = loadimages(set, workingdir);                          % Load the images and the corresponding files 
-
-trials              = CreateTrialList(set);                                 % create trials, split in runs, etc..
+scrn.ptbdir     = ptbdir;
 
 try
     %% ------------ START EXPERIMENT(open screen, etc..) ----------------- %%
-  
-    % start up screen
+    
+    % define colours
+    scrn.black      = [0 0 0];
+    scrn.white      = [255 255 255];
+    scrn.grey       = [128 128 128];
+
+    % text settings
+    scrn.textfont       = 'Verdana';
+    scrn.textsize       = 20;
+    scrn.fixationsize   = 30;
+    scrn.textbold       = 1; 
+
     % Screen('Preference', 'SkipSyncTests', 0) % set a Psychtoolbox global preference.
     Screen('Preference', 'SkipSyncTests', 1) % for testing I have set this to 1. When running the actuall task uncomment the above
 
     screenNumber        = max(Screen('Screens'));
     
-    [window, windrect]  = Screen('OpenWindow',screenNumber, scrn.grey);      % open window
+    [window, windrect]  = Screen('OpenWindow',screenNumber, scrn.black);      % open window
     
     AssertOpenGL;                                                           % Break and issue an error message if PTB is not based on OpenGL or Screen() is not working properly.
     Screen('Preference', 'Enable3DGraphics', 1);                            % enable 3d graphics
@@ -103,7 +106,18 @@ try
     scrn.xpixels            = xpixels;
     scrn.ypixels            = ypixels;
     
-    
+    %% --------------- RUN A FEW IMPORTANT UTIL FUNCTIONS ----------------- %%
+
+    set                 = TaskSettings(taskNb);                                 % Define the first task specific parameters
+
+    keys                = DefineKeys(taskNb);                                   % Define keys of the task
+
+    set                 = loadimages(set, workingdir);                          % Load the images and the corresponding files 
+
+    scrn                = screenSettings(scrn, set);                            % Define screen setup
+
+    trials              = CreateTrialList(set);                                 % create trials, split in runs, etc..
+
     %% ------------- INSTRUCTIONS ------------------ %%
     
     % Start instructions
@@ -114,7 +128,7 @@ try
     % display instructions 
     instructions = Screen('OpenOffscreenWindow', window, windrect);
     Screen('TextSize', instructions, scrn.textsize);
-    Screen('FillRect', instructions, scrn.grey ,windrect);
+    Screen('FillRect', instructions, scrn.black,windrect);
     DrawFormattedText(instructions, 'Please maintain your attention at the center of the screen. In every trial,', 'center', scrn.ycenter-150, scrn.white);
     DrawFormattedText(instructions, 'you will be briefly presented with an arrow (cue) at the center of the screen pointing towards,', 'center', scrn.ycenter-100, scrn.white);
     DrawFormattedText(instructions, 'left or right. After the cue a target will appear either at the left or the right of the center. When you see the', 'center', scrn.ycenter-50, scrn.white);
@@ -150,7 +164,7 @@ try
             
             Screen('OpenOffscreenWindow', window, windrect);
             Screen('TextSize', window, scrn.textsize);
-            Screen('FillRect', window, scrn.grey ,windrect);
+            Screen('FillRect', window, scrn.black,windrect);
             DrawFormattedText(window, sprintf('Great! Starting run %d',run), 'center', 'center', scrn.white);
             Screen('Flip', window); 
             WaitSecs(3); % wait for three secs before starting the 1st run
@@ -161,7 +175,7 @@ try
             
             Screen('OpenOffscreenWindow', window, windrect);
             Screen('TextSize', window, scrn.textsize);
-            Screen('FillRect', window, scrn.grey ,windrect);
+            Screen('FillRect', window, scrn.black,windrect);
             DrawFormattedText(window, 'Time for a break! When ready to continue, press SPACE', 'center', scrn.ycenter-50, scrn.white);
             DrawFormattedText(window, 'If you want to quit, press ESC.', 'center', 'center', scrn.white);
             Screen('Flip', window); 
@@ -183,7 +197,7 @@ try
                     
                     Screen('OpenOffscreenWindow', window, windrect);
                     Screen('TextSize', window, scrn.textsize);
-                    Screen('FillRect', window, scrn.grey ,windrect);
+                    Screen('FillRect', window, scrn.black,windrect);
                     DrawFormattedText(window, sprintf('Great! Starting run %d',run), 'center', 'center', scrn.white);
                     Screen('Flip', window); 
                     WaitSecs(3)
@@ -192,6 +206,7 @@ try
                     
                     % start next run
                     [set,logs]     = RunTrials(set, trials, scrn, run, logs); 
+                
                 end % 
                 
             end % end of waiting while loop
@@ -204,7 +219,7 @@ try
     % show thank you window
     Screen('OpenOffscreenWindow', window, windrect);
     Screen('TextSize', window, scrn.textsize);
-    Screen('FillRect', window, scrn.grey ,windrect);
+    Screen('FillRect', window, scrn.black,windrect);
     DrawFormattedText(window, 'This is the end of the experiment. Thank you for your time', 'center', 'center', scrn.white);
     Screen('Flip',window);
     WaitSecs(3);
