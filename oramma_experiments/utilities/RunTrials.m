@@ -30,6 +30,7 @@ ifi             = scrn.ifi;          % frame duration
 slack           = scrn.slack;        % slack is ifi/2 (important for timing)
 white           = scrn.white;
 grey            = scrn.grey;
+black           = scrn.black;
 fixsize         = scrn.fixationsize;
 textfont        = scrn.textfont;
 textsize        = scrn.textsize;
@@ -53,7 +54,7 @@ destrect        = [xcenter-imagewidth/2, ycenter-imageheight/2, xcenter+imagewid
 
 % create fixation cross offscreen and paste later (faster)
 fixationdisplay = Screen('OpenOffscreenWindow',window);
-Screen('FillRect', fixationdisplay, grey);
+Screen('FillRect', fixationdisplay, black);
 Screen('TextFont',fixationdisplay, textfont);
 Screen('TextSize',fixationdisplay, fixsize);
 DrawFormattedText(fixationdisplay, fixation, xcenter, ycenter, white);
@@ -216,20 +217,20 @@ elseif taskNb == 2 % if it is ab
     
     % CREATE RESPONSE WINDOWS AND PASTE LATER
     t1_responsewindow = Screen('OpenOffscreenWindow',window);
-    Screen('FillRect',t1_responsewindow, grey);
+    Screen('FillRect',t1_responsewindow, black);
     Screen('TextFont',t1_responsewindow, textfont);
     Screen('TextSize',t1_responsewindow, textsize);
     DrawFormattedText(t1_responsewindow, 'Which of these three items appeared as the first target?', 'center', 'center', white);
     
     t2_responsewindow = Screen('OpenOffscreenWindow',window);
-    Screen('FillRect',t2_responsewindow, grey);
+    Screen('FillRect',t2_responsewindow, black);
     Screen('TextFont',t2_responsewindow, textfont);
     Screen('TextSize',t2_responsewindow, textsize);
     DrawFormattedText(t2_responsewindow, 'Which of these three items appeared as the second target?', 'center', 'center', white);
     
     % BLANK SCREEN (GREY WITHOUT FIXATION)
     blankscreen = Screen('OpenOffscreenWindow',window);
-    Screen('FillRect', blankscreen, grey);
+    Screen('FillRect', blankscreen, black);
     
     %%  make textures of the targets and distractors and unpack keys
     targettexture       = cell(1,alltargets);
@@ -707,8 +708,8 @@ elseif taskNb == 4 % if it is the posner task
     %% define the x & y positions of the 3 response options on screen and screate Offscreen windows for flipping
     [x, y, r]   = CalculateObjectDest(imagewidth, windrect);  
     
-    leftrect = [xcenter-x/2.05-imagewidth/2 ycenter+y/500-imageheight/2 xcenter-x/2.05+imagewidth/2 ycenter+y/500+imageheight/2];
-    rightrect = [xcenter+x/2.05-imagewidth/2 ycenter+y/500-imageheight/2 xcenter+x/2.05+imagewidth/2 ycenter+y/500+imageheight/2];
+    leftrect    = [xcenter-x/0.5-imagewidth/2 ycenter+y/500-imageheight/2 xcenter-x/0.5+imagewidth/2 ycenter+y/500+imageheight/2];
+    rightrect   = [xcenter+x/0.5-imagewidth/2 ycenter+y/500-imageheight/2 xcenter+x/0.5+imagewidth/2 ycenter+y/500+imageheight/2];
     allrects    = [leftrect; rightrect]';
     
     %% start the current run

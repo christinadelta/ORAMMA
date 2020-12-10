@@ -20,7 +20,7 @@ function [set] = TaskSettings(taskNb)
 set.taskNb      = taskNb; % initialize settings structure
 
 % STIMULI SETTINGS
-set.stimdeg     = 5;    % stimulus visual angle
+set.stimdeg     = 4;    % stimulus visual angle
 set.stimsize    = 200;  % should resize to 220x200 or leave it as 252x252?
 set.fixation    = '+';  % fixation cross 
 

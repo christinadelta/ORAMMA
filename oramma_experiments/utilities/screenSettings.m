@@ -1,49 +1,27 @@
-function [scrn] = screenSettings(set)
+function [scrn] = screenSettings(scrn, set)
 
 % screen settings of the ORAMMA tasks
 % 1. defines screen settings
-% 2. defines image size
-% 3. defines text font, colours, etc..
-
-% parameters here can be changed according to your screen and direcories
-% Add PTB to your path
-ptbdir          = '/Applications/Psychtoolbox'; % change to your ptb directory
-addpath(genpath(ptbdir))
-
-scrn.ptbdir     = ptbdir;
-scrn.screenRes  = [1152 720]; % change to your screen's resolution
+% 2. defines object x and y 
 
 %% define screen parameters 
 
 % change these parameters as appropreate 
+% screen resolution 
+scrn.actscreenRes   = scrn.actscreen; % get screen's actual resolution
+scrn.screenRes      = [1280 800]; % this also the windrect in px
+scrn.hz             = 60; 
+scrn.distview       = 600;
+scrn.width          = scrn.actwidth;
+scrn.height         = scrn.actheight;
 
-scrn.hz         = 60; 
-scrn.distview   = 700;
-scrn.width      = 380;
-scrn.height     = 677;
-
-%% define the image size 
+%% define object x and y 
 
 % don't change anything here
-
 angleradn       = 2 * atan(scrn.width / 2 /scrn.distview);
 angledeg        = angleradn * (180/pi);
 pix             = scrn.screenRes(1) / angledeg;
 scrn.objectx    = round(set.stimdeg * pix);
 scrn.objecty    = round(set.stimdeg * pix);
-
-%% define screen fonts sizes and colours
-
-% you may change these parameters as appropreate 
-% define colours
-scrn.black      = [0 0 0];
-scrn.white      = [255 255 255];
-scrn.grey       = [128 128 128];
-
-% text settings
-scrn.textfont       = 'Verdana';
-scrn.textsize       = 20;
-scrn.fixationsize   = 30;
-scrn.textbold       = 1; 
 
 end
