@@ -18,3 +18,11 @@ A collection of behavioural experiments programmed with Matlab.
 * Working Memory task
 * Episodic Memory task
 * Semantic memory task
+
+## Completed tasks so far:
+* Reaction times task (simple version without masking)
+* Attentional blink task (simple version with digits and letters)
+* Passive viewing task 
+* Posner cuing task (simple version adapted from Posner, 1980)
+* Additional singleton task (simple version adapted from Theeuwes, 1992)
+* Attentional capture task (version with faces and houses as stimuli)
