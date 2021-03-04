@@ -194,8 +194,43 @@ elseif taskNb == 4
     
     clear image data raw vars
     
+elseif taskNb == 5
+    
+    % get the correct stimuli
+    task_stimuli        = fullfile(imgdir, 'AC_stimuli');
+
+    % read the excel file
+    [vars,~,raw]      = xlsread(fullfile(exceldir, 'ac_stimuli.xls'));
+    
+    % remove the headers
+    vars(headers,:)     = [];
+    raw(headers,:)      = [];
+    
+    set.animacy         = vars(:,1);
+    set.category        = vars(:,2);
+    set.item            = vars(:,3);
+    
+    % ------------------------------
+    % create a stucture to store the image files 
+    data                = [];
+    set.allitems        = length(raw); 
+    
+    for i=1:length(raw)
+
+            Img             = fullfile(task_stimuli,raw{i});
+            image           = imread(Img);
+            data(i).file    = imresize(image,[set.stimsize set.stimsize]); % should resize or not?
+
+    end
+    
+    % update settings structure
+    set.data        = data;
+
+    set.stimw       = size(data(1).file,1);   % width of objects
+    set.stimh       = set.stimw;              % height of objects
+    
+    clear image data raw vars
+    
 end % end of task if statement
-
-
 
 end

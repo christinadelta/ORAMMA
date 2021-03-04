@@ -73,6 +73,22 @@ elseif taskNb == 4
     keys.spacekey   = KbChecklist(3); % space
     keys.esckey     = KbChecklist(3); % escape
     
+elseif taskNb == 5
+    
+    responsekeys    = {'q','p'}; % q = male, p = female
+    
+    for i = 1:length(responsekeys)
+        KbChecklist = [KbName(responsekeys{i}),KbChecklist];
+    end
+    
+    RestrictKeysForKbCheck(KbChecklist);
+
+
+    keys.malekey        = KbChecklist(1); % 'q'
+    keys.femalekey      = KbChecklist(2); % 'p'
+    keys.spacekey       = KbChecklist(3); % 'space'
+    keys.esckey         = KbChecklist(4); % 'escape'
+    
 end % end of if statement
 
 end

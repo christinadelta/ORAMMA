@@ -3,6 +3,7 @@ function [trials] = CreateTrialList(set)
 % Uses the task number to create a list of trials for each task 
 % part of the ORAMMA experiments
 
+% TODO: COMPLETE THE ATTENTIONAL CAPTURE (AC) TRIALS LIST
 taskNb = set.taskNb;
 
 if taskNb == 1 % if task is RTs 
@@ -148,6 +149,36 @@ elseif taskNb == 4
     trials.runtrials    = runtrials; % add runtrials to the trials struct (we'll use this when running trials)
     
     clear temp randomizedlist  
+    
+    
+elseif taskNb == 5 % if task is the attentional capture Version 1
+    
+    % we have 8 conditions:
+    % information about the conditions and trials per condition are given
+    % in the doc file of the attentional capture task
+    
+    cond            = 8;
+    conditions      = 1:cond;
+    conditionrep    = 100; % 100 repetitions per condition
+    
+    boxcolours      = 8; % green, red, grey, yellow, purple, pink, blue, brown
+    boxcol          = 1:boxcolours;
+    
+    % unpack stimuli and variables
+    item            = set.item;     % objects
+    animacy         = set.animacy;  % face, house or indoor?
+    category        = set.category; % female of male?
+    itemrep         = 20;           % each item will be presented 20 times in total
+    
+    % create initial lists of stimuli of left and right streams
+    column1         = repmat(item, itemrep, 1); % left stream
+    column3         = column1;                  % right stream
+
+    
+    % create initial list of the central stream
+    centralstream   = repmat(cat(2, item, animacy, category), itemrep, 1);
+    
+    
     
 end % end of if statement 
     

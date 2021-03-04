@@ -27,6 +27,7 @@ set.fixation    = '+';  % fixation cross
 % BASIC IMPORTANT SETTINGS
 set.EEG         = 0; % set to 1 when in testing room
 set.MEG         = 0; % set to 1 when in testing room
+set.fMRI        = 0; % set to 1 when in testing room
     
 
 
@@ -67,27 +68,39 @@ elseif taskNb == 3
     
     % BASIC IMPORTANT SETTINGS
     set.name        = 'pw'; % task name
-    set.runs        = 2; % number of blocks (or runs)
-    set.break       = 5; % default break between runs
+    set.runs        = 2;    % number of blocks (or runs)
+    set.break       = 5;    % default break between runs
     
     % EXPERIMENTAL SETTINGS
     set.duration    = .500; % stimulus duration = 500 ms
     set.response    = 1.5;  % response time in seconds
-    set.isi         = 2;  % in seconds
+    set.isi         = 2;    % in seconds
     set.jitter      = .2;   % 200 ms
     
 elseif taskNb == 4 
     
     % BASIC IMPORTANT SETTINGS
     set.name        = 'posner'; % task name
-    set.runs        = 10; % number of blocks (or runs)
-    set.break       = 5; % default break between runs
+    set.runs        = 10;       % number of blocks (or runs)
+    set.break       = 5;        % default break between runs
     
     % EXPERIMENTAL SETTINGS
     set.cueduration     = .200; % arrow duration = 200 ms
     set.targetduration  = .200; % target duration = 200 ms
     set.response        = 1.1;  % response time in seconds
-    set.isi             = 2;  % in seconds
+    set.isi             = 2;    % in seconds
+    set.jitter          = .2;   % 200 ms
+    
+elseif taskNb == 5
+    
+    % BASIC IMPORTANT SETTINGS
+    set.name        = 'acv1'; % task name
+    set.runs        = 10;     % number of blocks (or runs)
+    set.break       = 5;      % default break between runs
+    
+    set.duration    = .116; % 116 ms trial duration 
+    set.response    = 1.8;  % 1.8 sec to respond
+    set.isi         = 2; % 2 sec isi
     set.jitter          = .2;   % 200 ms
     
 end % end of if statement
