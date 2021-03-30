@@ -10,7 +10,6 @@ A collection of behavioural experiments programmed with Matlab.
 * Additional Singleton task (Selective Attention)
 * Duration Discrimination (Time Perception)
 * Posner Cuing task (Selective Attention)
-* Discriminability task (Object Recognition)
 * Episodic Memory task (Long-term Memory)
 * Semantic memory task (Long-term Memory)
 * Working Memory task
